@@ -393,6 +393,22 @@ func (cc *CodecContext) SendFrame(f *Frame) error {
 	return newError(C.avcodec_send_frame(cc.c, fc))
 }
 
+// https://ffmpeg.org/doxygen/7.0/group__lavc__decoding.html#ga5c30b73f0ec105f93d4e86464f541f21
+func (cc *CodecContext) DecodeSubtitle(p *Packet, sub *Subtitle) (bool, error) {
+	//return int(C.avcodec_decode_subtitle2((*C.struct_AVCodecContext)(unsafe.Pointer(ctxt)), (*C.struct_AVSubtitle)(s), (*C.int)(unsafe.Pointer(g)), (*C.struct_AVPacket)(a)))
+	var pc *C.AVPacket
+	if p != nil {
+		pc = p.c
+	}
+	var sc *C.AVSubtitle
+	if sub != nil {
+		sc = sub.c
+	}
+	var got C.int
+	err := newError(C.avcodec_decode_subtitle2(cc.c, sc, &got, pc))
+	return got != 0, err
+}
+
 func (cc *CodecContext) ToCodecParameters(cp *CodecParameters) error {
 	return cp.FromCodecContext(cc)
 }
